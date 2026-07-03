@@ -1,4 +1,4 @@
-# Summary & Background
+# Background
 
 This dashboard is the deliverable for Q6, where source data used was from the initial setup before answering Q1-Q5.
 
