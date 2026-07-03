@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sales Performance Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif; }
+    body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    .view-btn[data-active="true"] {
+      background-color: white;
+      color: #0f172a;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.08);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <header class="mb-8">
+      <div class="flex items-baseline justify-between flex-wrap gap-2">
+        <div>
+          <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Sales Performance Dashboard</h1>
+          <p class="text-sm text-slate-500 mt-1">Executive view of sales, margin, and category performance. KPI values are lifetime totals (2014 to 2017). Latest recorded year (2017 &amp; 2016) used as delta benchmark.</p>
+        </div>
+        <div class="text-xs text-slate-400 tabular-nums"> </div>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-5 flex flex-col gap-3">
+      <div class="text-xs font-medium text-slate-500">Sales (Lifetime)</div>
+      <div class="text-3xl font-semibold text-slate-900 tabular-nums tracking-tight">$2,297,201</div>
+      <div class="flex items-center gap-2 text-xs">
+        <span class="text-emerald-600 font-medium tabular-nums inline-flex items-center gap-1">
+          &#9650; 20.4%
+        </span>
+        <span class="text-slate-400">YoY 2017 vs 2016</span>
+      </div>
+    </div>
+<div class="bg-white border border-slate-200 rounded-xl p-5 flex flex-col gap-3">
+      <div class="text-xs font-medium text-slate-500">Profit (Lifetime)</div>
+      <div class="text-3xl font-semibold text-slate-900 tabular-nums tracking-tight">$286,397</div>
+      <div class="flex items-center gap-2 text-xs">
+        <span class="text-emerald-600 font-medium tabular-nums inline-flex items-center gap-1">
+          &#9650; 14.2%
+        </span>
+        <span class="text-slate-400">YoY 2017 vs 2016</span>
+      </div>
+    </div>
+<div class="bg-white border border-slate-200 rounded-xl p-5 flex flex-col gap-3">
+      <div class="text-xs font-medium text-slate-500">Margin (Lifetime)</div>
+      <div class="text-3xl font-semibold text-slate-900 tabular-nums tracking-tight">12.5%</div>
+      <div class="flex items-center gap-2 text-xs">
+        <span class="text-rose-600 font-medium tabular-nums inline-flex items-center gap-1">
+          &#9660; 0.7 pp
+        </span>
+        <span class="text-slate-400">YoY 2017 vs 2016</span>
+      </div>
+    </div>
+<div class="bg-white border border-slate-200 rounded-xl p-5 flex flex-col gap-3">
+      <div class="text-xs font-medium text-slate-500">Orders (Lifetime)</div>
+      <div class="text-3xl font-semibold text-slate-900 tabular-nums tracking-tight">5,009</div>
+      <div class="flex items-center gap-2 text-xs">
+        <span class="text-emerald-600 font-medium tabular-nums inline-flex items-center gap-1">
+          &#9650; 28.3%
+        </span>
+        <span class="text-slate-400">YoY 2017 vs 2016</span>
+      </div>
+    </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-5 flex flex-col lg:col-span-4">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
+        <div>
+          <div class="text-sm font-semibold text-slate-900" id="trend-title">Sales &amp; Profit Trend</div>
+          <div class="text-xs text-slate-500 mt-0.5" id="trend-subtitle">Monthly view across the full 2014 to 2017 history. Sales as area, profit as line.</div>
+        </div>
+        <div class="inline-flex bg-slate-100 rounded-lg p-1 gap-0.5 text-xs self-start flex-shrink-0" role="tablist" aria-label="Chart view">
+          <button id="view-timeline" class="view-btn px-3 py-1 rounded-md font-medium text-slate-500 hover:text-slate-900" data-active="true">Full historical</button>
+          <button id="view-yoy"      class="view-btn px-3 py-1 rounded-md font-medium text-slate-500 hover:text-slate-900">Latest year overlay</button>
+        </div>
+      </div>
+      <div class="flex-1 min-h-0"><div>                            <div id="trend-chart" class="plotly-graph-div" style="height:300px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("trend-chart")) {                    Plotly.newPlot(                        "trend-chart",                        [{"fill":"tozeroy","fillcolor":"rgba(37, 99, 235, 0.10)","hovertemplate":"\u003cb\u003e%{x}\u003c\u002fb\u003e\u003cbr\u003eSales: $%{y:,.0f}\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#2563eb","shape":"spline","smoothing":0.6,"width":2.5},"mode":"lines","name":"Sales","x":["2014-01-01T00:00:00","2014-02-01T00:00:00","2014-03-01T00:00:00","2014-04-01T00:00:00","2014-05-01T00:00:00","2014-06-01T00:00:00","2014-07-01T00:00:00","2014-08-01T00:00:00","2014-09-01T00:00:00","2014-10-01T00:00:00","2014-11-01T00:00:00","2014-12-01T00:00:00","2015-01-01T00:00:00","2015-02-01T00:00:00","2015-03-01T00:00:00","2015-04-01T00:00:00","2015-05-01T00:00:00","2015-06-01T00:00:00","2015-07-01T00:00:00","2015-08-01T00:00:00","2015-09-01T00:00:00","2015-10-01T00:00:00","2015-11-01T00:00:00","2015-12-01T00:00:00","2016-01-01T00:00:00","2016-02-01T00:00:00","2016-03-01T00:00:00","2016-04-01T00:00:00","2016-05-01T00:00:00","2016-06-01T00:00:00","2016-07-01T00:00:00","2016-08-01T00:00:00","2016-09-01T00:00:00","2016-10-01T00:00:00","2016-11-01T00:00:00","2016-12-01T00:00:00","2017-01-01T00:00:00","2017-02-01T00:00:00","2017-03-01T00:00:00","2017-04-01T00:00:00","2017-05-01T00:00:00","2017-06-01T00:00:00","2017-07-01T00:00:00","2017-08-01T00:00:00","2017-09-01T00:00:00","2017-10-01T00:00:00","2017-11-01T00:00:00","2017-12-01T00:00:00"],"y":{"dtype":"f8","bdata":"9ihcj3LOy0AIrBxa5KexQDVeuklgMetASOF6FNah20B9PzVeEhjXQF+YTBVk5OBAarx0k0yT4ECLbOf7XUHbQPd14JwV9\u002fNA1XjpJlm33kBRa5p3SzLzQHNoke2Z+vBA5WGh1oS\u002f0UBU46WbtFfHQNNNYhDI6OJAJzEIrGay4EAtsp3v62zdQJzEILBSN9hAzczMzFQX3ED35GGhSgTiQDeJQWB9iu9Ad76fGjur3kB1kxgESYzyQKvP1VZ4SvJAlkOLbJ8b0kCPwvUotHDWQAAAAAB8QOlAke18P8Hr4kDwp8ZLd9PrQAIrhxYRs+NAQmDl0L4r40C5\u002fIf012LeQNuK\u002fWUg7PFAcT0K1\u002fck7UBos+pzP2PzQJzEILBwrvdAF9nO92t45UBSJ6CJSNPTQME5I0oLv+xA7C+7JzHV4UCBJsKGo5zlQNc07zi33ulAZDvfTw0a5kDb+X5qHNLuQFCNl26qc\u002fVA+1xtxQ798kAzMzMz\u002fer8QF8HzhlVd\u002fRA"},"type":"scatter"},{"hovertemplate":"\u003cb\u003e%{x}\u003c\u002fb\u003e\u003cbr\u003eProfit: $%{y:,.0f}\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#10b981","shape":"spline","smoothing":0.6,"width":2},"mode":"lines","name":"Profit","x":["2014-01-01T00:00:00","2014-02-01T00:00:00","2014-03-01T00:00:00","2014-04-01T00:00:00","2014-05-01T00:00:00","2014-06-01T00:00:00","2014-07-01T00:00:00","2014-08-01T00:00:00","2014-09-01T00:00:00","2014-10-01T00:00:00","2014-11-01T00:00:00","2014-12-01T00:00:00","2015-01-01T00:00:00","2015-02-01T00:00:00","2015-03-01T00:00:00","2015-04-01T00:00:00","2015-05-01T00:00:00","2015-06-01T00:00:00","2015-07-01T00:00:00","2015-08-01T00:00:00","2015-09-01T00:00:00","2015-10-01T00:00:00","2015-11-01T00:00:00","2015-12-01T00:00:00","2016-01-01T00:00:00","2016-02-01T00:00:00","2016-03-01T00:00:00","2016-04-01T00:00:00","2016-05-01T00:00:00","2016-06-01T00:00:00","2016-07-01T00:00:00","2016-08-01T00:00:00","2016-09-01T00:00:00","2016-10-01T00:00:00","2016-11-01T00:00:00","2016-12-01T00:00:00","2017-01-01T00:00:00","2017-02-01T00:00:00","2017-03-01T00:00:00","2017-04-01T00:00:00","2017-05-01T00:00:00","2017-06-01T00:00:00","2017-07-01T00:00:00","2017-08-01T00:00:00","2017-09-01T00:00:00","2017-10-01T00:00:00","2017-11-01T00:00:00","2017-12-01T00:00:00"],"y":{"dtype":"f8","bdata":"si5uo2Eko0CxUGuad\u002fKKQJtVn6utK39APZtVn6tBq0B88rBQa2WlQAYSFD+GcLNAZohjXdxLisAUrkfhGsa0QJyiI7kMRMBAhlrTvIPwqkDuWkI+ECbCQP+ye\u002fLIi8FAJQaBlQOiqcDgvg6cs\u002fulQMbctYQMAsNARpT2Bn9bsEA5tMh23juyQKqCUUkdD6pA\u002fkP67UuxqUAWak3zzuu0QIiFWtOUCMBArBxaZLsCpkAVjErqZF3IQDXvOEX3UL9AmN2Th6URpkAIrBxalIyzQA4tsp3vN6xABaOSOqFDp0ARNjy9EuvAQJ5eKctgjrJAKe0NvuBQsUA6I0p7IxygQO2ePCxUOMJA16NwPZK5z0A9Ctej0FavQCo6kstTd9FArIvbaHDku0BzaJHtfDeZQDEIrBzyz8xAuB6F61EqjUAcfGEylca4QKK0N\u002fiqD8BARpT2Bp8ou0BlqmBUeqjBQNSa5h3Hd8VABoGVQ6MdwkBMpgpGDe3CQCBB8WOskcBA"},"yaxis":"y2","type":"scatter"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"font":{"family":"Inter, ui-sans-serif, system-ui, -apple-system, sans-serif","color":"#0f172a","size":12},"margin":{"l":60,"r":60,"t":20,"b":40},"hoverlabel":{"font":{"family":"Inter, sans-serif","size":12},"bgcolor":"white","bordercolor":"#e2e8f0"},"xaxis":{"tickfont":{"color":"#64748b"},"showline":false,"ticks":"","showgrid":false,"gridcolor":"#e2e8f0","griddash":"dash","zeroline":false},"yaxis":{"tickfont":{"color":"#64748b"},"showline":false,"ticks":"","showgrid":true,"gridcolor":"#e2e8f0","griddash":"dash","zeroline":false,"tickprefix":"$","tickformat":",.0f"},"yaxis2":{"overlaying":"y","side":"right","showgrid":false,"tickprefix":"$","tickformat":",.0f","tickfont":{"color":"#64748b"},"showline":false},"legend":{"orientation":"h","yanchor":"bottom","y":1.02,"xanchor":"left","x":0,"bgcolor":"rgba(0,0,0,0)"},"plot_bgcolor":"white","paper_bgcolor":"white","height":300,"showlegend":true},                        {"displayModeBar": false, "responsive": true}                    )                };            </script>        </div></div>
+    </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-5 flex flex-col lg:col-span-2">
+          <div class="mb-4">
+            <div class="text-sm font-semibold text-slate-900">Profit Margin by Subcategory</div>
+            <div class="text-xs text-slate-500 mt-0.5">Lifetime margin per subcategory. Sorted ascending, loss-makers in red.</div>
+          </div>
+          <div class="flex-1 min-h-0"><div>                            <div id="subcat-chart" class="plotly-graph-div" style="height:520px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("subcat-chart")) {                    Plotly.newPlot(                        "subcat-chart",                        [{"cliponaxis":false,"customdata":{"dtype":"f8","bdata":"TDeJQaxDCUGHp1fKXk\u002fRwNBE2PD\u002fC\u002fxAJzEIrBwhq8Coxks3McrmQM\u002f3U+NllJLAXrpJDLUZB0GvlGWIg3GqQP7UeGkEDBRBVcGopIr32UCgGi\u002fdHFMLQVvTvOO0x9RAqMZLN1wkFEFPQBNhd7zlQMl2vp+SY\u002fZA2ht8YZKByUCgGi\u002fdpdQIQUI+6Nlwg91Aarx0k8JA+kDZPXlYgLbRQJzEILCye9pA9P3UeMl\u002fuUCBlUOLom4EQcKGp1cUeuRAw\u002fUoXI+gp0BMpgpGJayNQNejcD3AQAJBT6+UZToo60A\u002fNV66GRfQQDQRNjwtNLtA8KfGS\u002fMo80A0orQ3sqDgQC2yne8nY8hAL90kBkGqtUA=","shape":"17, 2"},"hovertemplate":"\u003cb\u003e%{y}\u003c\u002fb\u003e\u003cbr\u003eMargin: %{x:.1f}%\u003cbr\u003eSales: $%{customdata[0]:,.0f}\u003cbr\u003eProfit: $%{customdata[1]:,.0f}\u003cextra\u003e\u003c\u002fextra\u003e","insidetextanchor":"end","insidetextfont":{"color":"white","size":11},"marker":{"color":["#dc2626","#dc2626","#dc2626","#2563eb","#2563eb","#2563eb","#2563eb","#2563eb","#2563eb","#2563eb","#2563eb","#2563eb","#2563eb","#2563eb","#2563eb","#2563eb","#2563eb"]},"orientation":"h","outsidetextfont":{"color":"#64748b","size":11},"text":["-8.6%","-3.0%","-2.5%","+1.8%","+8.1%","+9.5%","+13.5%","+14.2%","+14.9%","+16.9%","+24.1%","+25.1%","+31.4%","+37.2%","+42.3%","+43.4%","+44.4%"],"textposition":"auto","x":{"dtype":"f8","bdata":"hC0\u002f9QAhIcCyP4EYoS4IwAihCAmuYQTAZxxSSS6e\u002fD8W8N8W\u002fDAgQEoXcj8hAyNA9XUrEYn6KkBEkQoyEHssQAjSzvj3ti1A4fXzlRXeMEC5Zx6DMhI4QAsxW8kADjlA1JAmToFlP0AFN4vqCJlCQLmgLh9AIkVAB3OiuCeyRUCyZigNlzVGQA=="},"y":["Tables","Bookcases","Supplies","Machines","Chairs","Storage","Phones","Furnishings","Binders","Appliances","Art","Accessories","Fasteners","Copiers","Envelopes","Paper","Labels"],"type":"bar"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"font":{"family":"Inter, ui-sans-serif, system-ui, -apple-system, sans-serif","color":"#0f172a","size":12},"margin":{"l":100,"r":70,"t":8,"b":8},"hoverlabel":{"font":{"family":"Inter, sans-serif","size":12},"bgcolor":"white","bordercolor":"#e2e8f0"},"xaxis":{"tickfont":{"color":"#64748b"},"showline":false,"ticks":"","showgrid":true,"gridcolor":"#e2e8f0","griddash":"dash","zeroline":true,"ticksuffix":"%","zerolinecolor":"#94a3b8","zerolinewidth":1},"yaxis":{"tickfont":{"color":"#0f172a","size":12},"showline":false,"ticks":"","showgrid":false},"plot_bgcolor":"white","paper_bgcolor":"white","height":520},                        {"displayModeBar": false, "responsive": true}                    )                };            </script>        </div></div>
+        </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-5 flex flex-col lg:col-span-1">
+          <div class="mb-4">
+            <div class="text-sm font-semibold text-slate-900">Sales Share by Category</div>
+            <div class="text-xs text-slate-500 mt-0.5">Lifetime revenue concentration across product categories.</div>
+          </div>
+          <div class="flex-1 min-h-0"><div>                            <div id="donut-chart" class="plotly-graph-div" style="height:280px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("donut-chart")) {                    Plotly.newPlot(                        "donut-chart",                        [{"direction":"clockwise","hole":0.55,"hovertemplate":"\u003cb\u003e%{label}\u003c\u002fb\u003e\u003cbr\u003eSales: $%{value:,.0f}\u003cbr\u003eShare: %{percent}\u003cextra\u003e\u003c\u002fextra\u003e","insidetextorientation":"horizontal","labels":["Technology","Furniture","Office Supplies"],"marker":{"colors":["#2563eb","#10b981","#f59e0b"],"line":{"color":"white","width":3}},"sort":false,"textfont":{"color":"white","family":"Inter, sans-serif","size":13},"textinfo":"percent","textposition":"inside","values":{"dtype":"f8","bdata":"QmDlEHSEKUHFjzGX36QmQdNNYhCO8SVB"},"type":"pie"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"font":{"family":"Inter, ui-sans-serif, system-ui, -apple-system, sans-serif","color":"#0f172a","size":12},"margin":{"l":8,"r":88,"t":8,"b":8},"hoverlabel":{"font":{"family":"Inter, sans-serif","size":12},"bgcolor":"white","bordercolor":"#e2e8f0"},"legend":{"font":{"size":11,"color":"#64748b"},"orientation":"v","yanchor":"middle","y":0.5,"xanchor":"left","x":1.02,"bgcolor":"rgba(0,0,0,0)"},"plot_bgcolor":"white","paper_bgcolor":"white","height":280,"showlegend":true},                        {"displayModeBar": false, "responsive": true}                    )                };            </script>        </div></div>
+        </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-5 flex flex-col lg:col-span-1">
+          <div class="mb-4">
+            <div class="text-sm font-semibold text-slate-900">Customer Segments</div>
+            <div class="text-xs text-slate-500 mt-0.5">Lifetime sales, profit, and margin by segment.</div>
+          </div>
+          <div class="flex-1 min-h-0"><div class="py-3 border-b border-slate-100 last:border-0 flex flex-col gap-1">
+          <div class="text-sm font-medium text-slate-800 mb-0.5">Consumer</div>
+          <div class="flex items-baseline justify-between tabular-nums">
+          <div class="text-xs text-slate-400">Sales</div>
+          <div class="text-sm text-slate-900">$1,161,401</div>
+        </div>
+          <div class="flex items-baseline justify-between tabular-nums">
+          <div class="text-xs text-slate-400">Profit</div>
+          <div class="text-sm text-slate-900">$134,119</div>
+        </div>
+          <div class="flex items-baseline justify-between tabular-nums">
+          <div class="text-xs text-slate-400">Margin</div>
+          <div class="text-sm text-slate-900"><span class="text-emerald-700 font-medium">11.5%</span></div>
+        </div>
+        </div>
+<div class="py-3 border-b border-slate-100 last:border-0 flex flex-col gap-1">
+          <div class="text-sm font-medium text-slate-800 mb-0.5">Corporate</div>
+          <div class="flex items-baseline justify-between tabular-nums">
+          <div class="text-xs text-slate-400">Sales</div>
+          <div class="text-sm text-slate-900">$706,146</div>
+        </div>
+          <div class="flex items-baseline justify-between tabular-nums">
+          <div class="text-xs text-slate-400">Profit</div>
+          <div class="text-sm text-slate-900">$91,979</div>
+        </div>
+          <div class="flex items-baseline justify-between tabular-nums">
+          <div class="text-xs text-slate-400">Margin</div>
+          <div class="text-sm text-slate-900"><span class="text-emerald-700 font-medium">13.0%</span></div>
+        </div>
+        </div>
+<div class="py-3 border-b border-slate-100 last:border-0 flex flex-col gap-1">
+          <div class="text-sm font-medium text-slate-800 mb-0.5">Home Office</div>
+          <div class="flex items-baseline justify-between tabular-nums">
+          <div class="text-xs text-slate-400">Sales</div>
+          <div class="text-sm text-slate-900">$429,653</div>
+        </div>
+          <div class="flex items-baseline justify-between tabular-nums">
+          <div class="text-xs text-slate-400">Profit</div>
+          <div class="text-sm text-slate-900">$60,299</div>
+        </div>
+          <div class="flex items-baseline justify-between tabular-nums">
+          <div class="text-xs text-slate-400">Margin</div>
+          <div class="text-sm text-slate-900"><span class="text-emerald-700 font-medium">14.0%</span></div>
+        </div>
+        </div></div>
+        </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-5 flex flex-col lg:col-span-4">
+          <div class="mb-4">
+            <div class="text-sm font-semibold text-slate-900">Year on Year Summary</div>
+            <div class="text-xs text-slate-500 mt-0.5">Annual totals with growth vs prior year.</div>
+          </div>
+          <div class="flex-1 min-h-0">
+    <div class="grid grid-cols-5 gap-3 text-[10px] uppercase tracking-wide text-slate-400 pb-2 border-b border-slate-100">
+      <div>Year</div>
+      <div>Sales</div>
+      <div>Profit</div>
+      <div>Margin</div>
+      <div>Orders</div>
+    </div>
+    
+<div class="grid grid-cols-5 gap-3 py-3 border-b border-slate-100 last:border-0 items-start">
+          <div class="text-sm font-semibold text-slate-900 tabular-nums">2014</div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">$484,247</div>
+          <div><span class="text-slate-300 tabular-nums">&mdash;</span></div>
+        </div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">$49,544</div>
+          <div><span class="text-slate-300 tabular-nums">&mdash;</span></div>
+        </div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">10.2%</div>
+          <div><span class="text-slate-300 tabular-nums">&mdash;</span></div>
+        </div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">969</div>
+          <div><span class="text-slate-300 tabular-nums">&mdash;</span></div>
+        </div>
+        </div>
+<div class="grid grid-cols-5 gap-3 py-3 border-b border-slate-100 last:border-0 items-start">
+          <div class="text-sm font-semibold text-slate-900 tabular-nums">2015</div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">$470,533</div>
+          <div><span class="text-rose-600 tabular-nums text-xs font-medium">&#9660; 2.8%</span></div>
+        </div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">$61,619</div>
+          <div><span class="text-emerald-600 tabular-nums text-xs font-medium">&#9650; 24.4%</span></div>
+        </div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">13.1%</div>
+          <div><span class="text-emerald-600 tabular-nums text-xs font-medium">&#9650; 2.9 pp</span></div>
+        </div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">1,038</div>
+          <div><span class="text-emerald-600 tabular-nums text-xs font-medium">&#9650; 7.1%</span></div>
+        </div>
+        </div>
+<div class="grid grid-cols-5 gap-3 py-3 border-b border-slate-100 last:border-0 items-start">
+          <div class="text-sm font-semibold text-slate-900 tabular-nums">2016</div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">$609,206</div>
+          <div><span class="text-emerald-600 tabular-nums text-xs font-medium">&#9650; 29.5%</span></div>
+        </div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">$81,795</div>
+          <div><span class="text-emerald-600 tabular-nums text-xs font-medium">&#9650; 32.7%</span></div>
+        </div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">13.4%</div>
+          <div><span class="text-emerald-600 tabular-nums text-xs font-medium">&#9650; 0.3 pp</span></div>
+        </div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">1,315</div>
+          <div><span class="text-emerald-600 tabular-nums text-xs font-medium">&#9650; 26.7%</span></div>
+        </div>
+        </div>
+<div class="grid grid-cols-5 gap-3 py-3 border-b border-slate-100 last:border-0 items-start">
+          <div class="text-sm font-semibold text-slate-900 tabular-nums">2017</div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">$733,215</div>
+          <div><span class="text-emerald-600 tabular-nums text-xs font-medium">&#9650; 20.4%</span></div>
+        </div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">$93,439</div>
+          <div><span class="text-emerald-600 tabular-nums text-xs font-medium">&#9650; 14.2%</span></div>
+        </div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">12.7%</div>
+          <div><span class="text-rose-600 tabular-nums text-xs font-medium">&#9660; 0.7 pp</span></div>
+        </div>
+          <div class="flex flex-col gap-0.5">
+          <div class="text-sm text-slate-900 tabular-nums font-medium">1,687</div>
+          <div><span class="text-emerald-600 tabular-nums text-xs font-medium">&#9650; 28.3%</span></div>
+        </div>
+        </div></div>
+        </div>
+    </div>
+
+    <footer class="text-xs text-slate-400 mt-8 text-center">
+      Built with Plotly and Tailwind.
+    </footer>
+  </div>
+
+  <script>
+    const TREND_DATA    = {"months": ["2014-01-01", "2014-02-01", "2014-03-01", "2014-04-01", "2014-05-01", "2014-06-01", "2014-07-01", "2014-08-01", "2014-09-01", "2014-10-01", "2014-11-01", "2014-12-01", "2015-01-01", "2015-02-01", "2015-03-01", "2015-04-01", "2015-05-01", "2015-06-01", "2015-07-01", "2015-08-01", "2015-09-01", "2015-10-01", "2015-11-01", "2015-12-01", "2016-01-01", "2016-02-01", "2016-03-01", "2016-04-01", "2016-05-01", "2016-06-01", "2016-07-01", "2016-08-01", "2016-09-01", "2016-10-01", "2016-11-01", "2016-12-01", "2017-01-01", "2017-02-01", "2017-03-01", "2017-04-01", "2017-05-01", "2017-06-01", "2017-07-01", "2017-08-01", "2017-09-01", "2017-10-01", "2017-11-01", "2017-12-01"], "sales": [14236.895, 4519.892, 55691.009, 28295.345, 23648.287, 34595.1276, 33946.393, 27909.4685, 81777.3508, 31453.393, 78628.7167, 69545.6205, 18174.0756, 11951.411, 38726.252, 34195.2085, 30131.6865, 24797.292, 28765.325, 36898.3322, 64595.918, 31404.9235, 75972.5635, 74919.5212, 18542.491, 22978.815, 51715.875, 38750.039, 56987.728, 40344.534, 39261.963, 31115.3743, 73410.0249, 59687.745, 79411.9658, 96999.043, 43971.374, 20301.1334, 58872.3528, 36521.5361, 44261.1102, 52981.7257, 45264.416, 63120.888, 87866.652, 77776.9232, 118447.825, 83829.3188], "profit": [2450.1907, 862.3084, 498.7299, 3488.8352, 2738.7096, 4976.5244, -841.4826, 5318.105, 8328.0994, 3448.2573, 9292.1269, 8983.5699, -3281.007, 2813.8508, 9732.0978, 4187.4962, 4667.869, 3335.5572, 3288.6483, 5355.8084, 8209.1627, 2817.366, 12474.7884, 8016.9659, 2824.8233, 5004.5795, 3611.968, 2977.8149, 8662.1464, 4750.3781, 4432.8779, 2062.0693, 9328.6576, 16243.1425, 4011.4075, 17885.3093, 7140.4391, 1613.872, 14751.8915, 933.29, 6342.5828, 8223.3357, 6952.6212, 9040.9557, 10991.5556, 9275.2755, 9690.1037, 8483.3468]};
+    const OVERLAY_YEARS = [2016, 2017];
+
+    const chartDiv    = document.getElementById('trend-chart');
+    const title       = document.getElementById('trend-title');
+    const subtitle    = document.getElementById('trend-subtitle');
+    const btnTimeline = document.getElementById('view-timeline');
+    const btnYoy      = document.getElementById('view-yoy');
+
+    const LAYOUT_BASE = {
+      plot_bgcolor: 'white',
+      paper_bgcolor: 'white',
+      font: { family: 'Inter, ui-sans-serif, system-ui, sans-serif', color: '#0f172a', size: 12 },
+      hoverlabel: { bgcolor: 'white', bordercolor: '#e2e8f0', font: { family: 'Inter, sans-serif', size: 12 } },
+      height: 320,
+      showlegend: true,
+    };
+    const AXIS_CLEAN = { showline: false, ticks: '', showgrid: true, gridcolor: '#e2e8f0', griddash: 'dash', zeroline: false, tickfont: { color: '#64748b', size: 11 } };
+    const MONTH_TICKS = {
+      tickmode: 'array',
+      tickvals: [1,2,3,4,5,6,7,8,9,10,11,12],
+      ticktext: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    };
+
+    function layoutTimeline() {
+      return Object.assign({}, LAYOUT_BASE, {
+        margin: { l: 60, r: 60, t: 20, b: 30 },
+        legend: { orientation: 'h', yanchor: 'bottom', y: 1.02, xanchor: 'left', x: 0, bgcolor: 'rgba(0,0,0,0)' },
+        xaxis: Object.assign({}, AXIS_CLEAN, { showgrid: false }),
+        yaxis: Object.assign({}, AXIS_CLEAN, { tickprefix: '$', tickformat: ',.0f' }),
+        yaxis2: { overlaying: 'y', side: 'right', showgrid: false, tickprefix: '$', tickformat: ',.0f', tickfont: { color: '#64748b', size: 11 }, showline: false },
+      });
+    }
+
+    function layoutYoY() {
+      return Object.assign({}, LAYOUT_BASE, {
+        margin: { l: 60, r: 20, t: 40, b: 40 },
+        legend: { orientation: 'h', yanchor: 'bottom', y: -0.18, xanchor: 'center', x: 0.5, bgcolor: 'rgba(0,0,0,0)' },
+        xaxis:  Object.assign({}, AXIS_CLEAN, MONTH_TICKS, { domain: [0.00, 0.46], anchor: 'y',  showgrid: false }),
+        yaxis:  Object.assign({}, AXIS_CLEAN, { anchor: 'x',  tickprefix: '$', tickformat: ',.0f' }),
+        xaxis2: Object.assign({}, AXIS_CLEAN, MONTH_TICKS, { domain: [0.54, 1.00], anchor: 'y2', showgrid: false }),
+        yaxis2: Object.assign({}, AXIS_CLEAN, { anchor: 'x2', tickprefix: '$', tickformat: ',.0f' }),
+        annotations: [
+          { x: 0.23, y: 1.10, xref: 'paper', yref: 'paper', xanchor: 'center', text: '<b>Sales</b>',  showarrow: false, font: { size: 12, color: '#0f172a' } },
+          { x: 0.77, y: 1.10, xref: 'paper', yref: 'paper', xanchor: 'center', text: '<b>Profit</b>', showarrow: false, font: { size: 12, color: '#0f172a' } },
+        ],
+      });
+    }
+
+    function setActive(activeEl, otherEl) {
+      activeEl.setAttribute('data-active', 'true');
+      otherEl.removeAttribute('data-active');
+    }
+
+    function renderTimeline() {
+      Plotly.react(chartDiv, [
+        {
+          x: TREND_DATA.months, y: TREND_DATA.sales,
+          type: 'scatter', mode: 'lines', name: 'Sales',
+          line: { color: '#2563eb', width: 2.5, shape: 'spline', smoothing: 0.6 },
+          fill: 'tozeroy', fillcolor: 'rgba(37, 99, 235, 0.10)',
+          hovertemplate: '<b>%{x}</b><br>Sales: $%{y:,.0f}<extra></extra>',
+        },
+        {
+          x: TREND_DATA.months, y: TREND_DATA.profit,
+          type: 'scatter', mode: 'lines', name: 'Profit',
+          line: { color: '#10b981', width: 2, shape: 'spline', smoothing: 0.6 },
+          yaxis: 'y2',
+          hovertemplate: '<b>%{x}</b><br>Profit: $%{y:,.0f}<extra></extra>',
+        },
+      ], layoutTimeline(), { displayModeBar: false, responsive: true });
+      title.textContent = 'Sales & Profit Trend';
+      subtitle.textContent = 'Full monthly history from ' + TREND_DATA.months[0].slice(0,4) + ' to ' + TREND_DATA.months[TREND_DATA.months.length-1].slice(0,4) + '. Sales as area, profit as line.';
+    }
+
+    function renderYoY() {
+      const perYear = {};
+      TREND_DATA.months.forEach((m, i) => {
+        const d = new Date(m);
+        const yr = d.getUTCFullYear();
+        if (!OVERLAY_YEARS.includes(yr)) return;
+        const mo = d.getUTCMonth() + 1;
+        if (!perYear[yr]) perYear[yr] = { months: [], sales: [], profit: [] };
+        perYear[yr].months.push(mo);
+        perYear[yr].sales.push(TREND_DATA.sales[i]);
+        perYear[yr].profit.push(TREND_DATA.profit[i]);
+      });
+      const years = Object.keys(perYear).map(Number).sort();
+      const YEAR_COLOURS = { prior: '#94a3b8', latest: '#2563eb' };
+
+      const traces = [];
+      years.forEach((yr) => {
+        const isLatest = (yr === years[years.length - 1]);
+        const colour   = isLatest ? YEAR_COLOURS.latest : YEAR_COLOURS.prior;
+        traces.push({
+          x: perYear[yr].months, y: perYear[yr].sales,
+          type: 'scatter', mode: 'lines+markers',
+          name: String(yr), legendgroup: String(yr), showlegend: true,
+          line: { color: colour, width: 2.5, shape: 'spline', smoothing: 0.6 },
+          marker: { size: 5 },
+          xaxis: 'x', yaxis: 'y',
+          hovertemplate: `<b>${yr} · Month %{x}</b><br>Sales: $%{y:,.0f}<extra></extra>`,
+        });
+        traces.push({
+          x: perYear[yr].months, y: perYear[yr].profit,
+          type: 'scatter', mode: 'lines+markers',
+          name: String(yr), legendgroup: String(yr), showlegend: false,
+          line: { color: colour, width: 2.5, shape: 'spline', smoothing: 0.6 },
+          marker: { size: 5 },
+          xaxis: 'x2', yaxis: 'y2',
+          hovertemplate: `<b>${yr} · Month %{x}</b><br>Profit: $%{y:,.0f}<extra></extra>`,
+        });
+      });
+
+      Plotly.react(chartDiv, traces, layoutYoY(), { displayModeBar: false, responsive: true });
+      title.textContent = 'Sales & Profit: ' + OVERLAY_YEARS.join(' vs ');
+      subtitle.textContent = 'Monthly sales and profit for ' + OVERLAY_YEARS.join(' and ') + ', side-by-side overlays on a shared Jan to Dec axis.';
+    }
+
+    btnTimeline.addEventListener('click', () => { setActive(btnTimeline, btnYoy); renderTimeline(); });
+    btnYoy.addEventListener('click',      () => { setActive(btnYoy, btnTimeline); renderYoY(); });
+
+    renderTimeline();
+  </script>
+</body>
+</html>
