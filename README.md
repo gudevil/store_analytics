@@ -13,7 +13,8 @@ In the dashboard, I included the lifetime value as key KPI index to see how is t
 ## Run
 
 ```
-python build.py
+pip install -r requirements.txt
+python dashboard/build.py
 ```
 
 Reads `../analytics.duckdb` and writes `../docs/index.html`.
